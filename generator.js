@@ -98,9 +98,7 @@ function generateBlock() {
 			}
 		}
 	}
-
-	console.log("maxX: " + (maxX + 1) + ", minX: " + minX + ", maxY: " + (maxY + 1) + ", minY: " + (minY));
-
+	
 	var newblock = new Array();
 
 	//create an array with width and height 8 (the maximum dimensions a block can be)
