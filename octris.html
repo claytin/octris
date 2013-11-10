@@ -54,6 +54,8 @@
 				//start game udpate timer
 				clearInterval(timer);
     			timer = setInterval(function(){update()}, 500);
+
+
 			}
 
 			function update(){
@@ -85,7 +87,28 @@
     					octinomalX++;
     				}
     			}
+    			if(e.keyCode == 38){ //up arrow
+    				currentOctinomal = rotateOctinomal(currentOctinomal, 1);
+    			}
     			redraw();
+			}
+
+			function rotateOctinomal(direction = 0){
+				newOctinomal = new Array(currentOctinomal[0].length);
+				for(x = 0; x < currentOctinomal[0].length; x++){
+					newOctinomal[x] = new Array(currentOctinomal.length)
+					for(y = 0; y < currentOctinomal.length; y++){
+						newOctinomal[x][y] = currentOctinomal[currentOctinomal.length - 1 - y][x];
+					}
+				}
+
+				if(direction == 1){
+					for(i = 0; i < 3; i++){
+						newOctinomal = rotateOctinomal(newOctinomal);
+					}
+				}
+
+				return newOctinomal;
 			}
 
 			function drawOctinomal(xoffset, yoffset, blocks, color){ 
