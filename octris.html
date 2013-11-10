@@ -9,7 +9,7 @@
 
 				for(x = 0; x < 10; x++){
 					for(y = 0; y < 20; y++){
-						drawBlock(x, y, (x*100+y*100)%360);
+						drawBlock(x, y, Math.floor((Math.random()*180)+50), 50, 70);
 					}
 				}
 
@@ -97,56 +97,68 @@
 
 				//remove black space around shape
 				//dimension around octinomal
-				maxWidth = 0;
-				minWidth = 8;
-				maxHeight = 0;
-				minHeight = 8;
+				minX = 8;
+				minY = 8;
+				maxX = 0;
+				maxY = 0;
 				for(x = 0; x < 8; x++) {
 					for(y = 0; y < 8; y++) {
 						if(block[x][y] == true){
-							if(y > maxWidth){
-								maxWidth = y + 1;
+							if(y < minY){
+								minY = y;
 							}
-							if(y < minWidth){
-								minWidth = y + 1;
+							if (x < minX){
+								minX = x;
 							}
-							if(x > maxHeight){
-								maxHeight = x + 1;
+							if(x > maxX){
+								maxX = x;
 							}
-							if (x < minHeight){
-								minHeight = x + 1;
+							if(y > maxY){
+								maxY = y;
 							}
 						}
 					}
 				}
-				console.log("maxWidth: " + maxWidth + ", minWidth: " + minWidth + ", maxHeight: " + maxHeight + ", minHeight: " + minHeight);
 
+				console.log("maxX: " + (maxX + 1) + ", minX: " + minX + ", maxY: " + (maxY + 1) + ", minY: " + (minY));
 
-				return block;
+				var newblock = new Array();
+
+				//create an array with width and height 8 (the maximum dimensions a block can be)
+				for(x = 0; x < 8 - minX - ((8 - minX) - ((maxX + 1) - minX)); x++) {
+					newblock[x] = new Array();
+					for(y = 0; y < 8 - minY - ((8 - minY) - ((maxY + 1) - minY)); y++) {
+						newblock[x][y] = block[x + minX][y + minY];
+					}
+				}
+
+				return newblock;
 			}
 
 			function drawOctinomal(xoffset, yoffset, blocks, color){ 
 				blocknumber = 0;
-				for(blockx = 0; blockx < 8; blockx++) {
-					for(blocky = 0; blocky < 8; blocky++) {
+				for(blockx = 0; blockx < blocks.length; blockx++) {
+					for(blocky = 0; blocky < blocks[0].length; blocky++) {
 						if (blocks[blockx][blocky] == true) {
 							drawBlock(blockx + xoffset, blocky + yoffset, color);
 							ctx.fillStyle = "#000000";
 							ctx.font="20px Arial";
 							ctx.fillText(blocknumber + "", (blockx * 20) + 5 + (xoffset * 20), (blocky * 20) + 18 + (yoffset * 20));
 							blocknumber++
+						}else{
+							drawBlock(blockx + xoffset, blocky + yoffset, color, 50, 50);
 						}
 					}
 				}
 			}
 
-			function drawBlock(x, y, color) {
+			function drawBlock(x, y, color, saturation = 100,  brightness = 50) {
     			//Convert to pixel coordinates
     			pixelX = x*20;
     			pixelY = y*20;
     			
     			//Set the fill color for drawing commands
-    			ctx.fillStyle = "hsl(" + color + ",100%,30%)";
+    			ctx.fillStyle = "hsl(" + color + "," + saturation + "%," + brightness + "%)";
     			 
     			//Create a filled rectangle
     			ctx.fillRect(pixelX,pixelY,20,20);
