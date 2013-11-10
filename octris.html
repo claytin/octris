@@ -4,51 +4,131 @@
 		<title>Why octris doesn't work</title>
 		<script src="generator.js"></script>
 		<script>
-			function initialize() {
-    			c = document.getElementById("myCanvas");
-				ctx = c.getContext("2d");
+			//global variables
+			var timer;  //Game timer
+			var tileCountVertical;
+			var tileCountHorizontal;
+			var tileWidth;
+			var tileHeight;
 
-				for(x = 0; x < 10; x++){
-					for(y = 0; y < 20; y++){
-						drawBlock(x, y, Math.floor((Math.random()*180)+50), 50, 70);
+			//the current block and its properties
+			var currentOctinomal;
+			var octinomalX;
+			var octinomalY;
+			var octinomalRotation;
+			var octinomalColor;
+
+			//grids
+			var bgGrid;	//a fancy smancy background
+			var fgGrid;	//where everything goes to die
+
+			function initialize() {
+    			canvas = document.getElementById("myCanvas");
+				ctx = canvas.getContext("2d");
+				//ctx.width = window.innerWidth;
+				//ctx.height = window.innerHeight;
+
+				tileCountVertical = 20;
+				tileCountHorizontal = 10;
+				tileWidth = canvas.width / tileCountHorizontal;
+				tileHeight = canvas.height / tileCountVertical;
+
+				//background stuff
+				bgGrid = new Array(tileCountHorizontal);
+				for(x = 0; x < tileCountHorizontal; x++){
+					bgGrid[x] = new Array(tileCountVertical);
+					for(y = 0; y < tileCountVertical; y++){
+						bgGrid[x][y] = Math.floor((Math.random()*360)+1);
 					}
 				}
 
-				block = generateBlock()
-				drawOctinomal(0, 0, block, 0);
-				drawOctinomal(0, 8, block, 360 / 2);
+				drawGrid(0, 0, bgGrid,50,70);
+
+				//create initial octinomal
+				currentOctinomal = generateBlock();
+				octinomalX = Math.floor(currentOctinomal.length / 2);
+				octinomalY = -currentOctinomal[0].length + 1;
+				octinomalColor = Math.floor((Math.random()*360)+0)
+				drawOctinomal(octinomalX, octinomalY, currentOctinomal, octinomalColor);
+
+				//start game udpate timer
+				clearInterval(timer);
+    			timer = setInterval(function(){update()}, 500);
+			}
+
+			function update(){
+				octinomalY++;
+
+				//check if collided / reached base
+				if(currentOctinomal[0].length + octinomalY - 1 >= tileCountVertical){
+					octinomalY--;
+				}
+
+				redraw();
+			}
+
+			function redraw(){
+				//redraw everything
+				ctx.clearRect(0,0,ctx.width,ctx.height);	//clear screen
+				drawGrid(0, 0, bgGrid,50,70);	//draw background
+				drawOctinomal(octinomalX, octinomalY, currentOctinomal, octinomalColor);	//draw current octinomal
+			}
+			
+			function keyDown(e) {
+    			if(e.keyCode == 37) { //Left arrow
+    				if(octinomalX > 0){
+    					octinomalX--;
+    				}
+    			}
+    			if(e.keyCode == 39) { //Right arrow
+    				if (octinomalX + currentOctinomal.length < tileCountHorizontal) {
+    					octinomalX++;
+    				}
+    			}
+    			redraw();
 			}
 
 			function drawOctinomal(xoffset, yoffset, blocks, color){ 
 				blocknumber = 0;
 				for(blockx = 0; blockx < blocks.length; blockx++) {
 					for(blocky = 0; blocky < blocks[0].length; blocky++) {
-						if (blocks[blockx][blocky] == true) {
+						if (blocks[blockx][blocky] >= 1) {
 							drawBlock(blockx + xoffset, blocky + yoffset, color);
 							ctx.fillStyle = "#000000";
 							ctx.font="20px Arial";
-							ctx.fillText(blocknumber + "", (blockx * 20) + 5 + (xoffset * 20), (blocky * 20) + 18 + (yoffset * 20));
+							ctx.fillText(blocknumber + "", (blockx * tileWidth) + 5 + (xoffset * tileWidth),
+							 (blocky * tileHeight) + 18 + (yoffset * tileHeight));
 							blocknumber++
 						}
 					}
 				}
 			}
 
-			function drawBlock(x, y, color, saturation = 100,  brightness = 50) {
+			function drawGrid(xoffset, yoffset, blocks, saturation = 100, brightness = 50){ 
+				for(blockx = 0; blockx < blocks.length; blockx++) {
+					for(blocky = 0; blocky < blocks[0].length; blocky++) {
+						if (blocks[blockx][blocky] >= 1) {
+							drawBlock(blockx + xoffset, blocky + yoffset, blocks[blockx][blocky], saturation, brightness);
+						}
+					}
+				}
+			}
+
+			function drawBlock(x, y, color = 0, saturation = 100,  brightness = 50) {
     			//Convert to pixel coordinates
-    			pixelX = x*20;
-    			pixelY = y*20;
+    			pixelX = x * tileWidth;
+    			pixelY = y * tileHeight;
     			
     			//Set the fill color for drawing commands
     			ctx.fillStyle = "hsl(" + color + "," + saturation + "%," + brightness + "%)";
     			 
     			//Create a filled rectangle
-    			ctx.fillRect(pixelX,pixelY,20,20);
+    			ctx.fillRect(pixelX,pixelY, tileWidth, tileHeight);
 			}
 		</script>
 	</head>
-	<body onload="initialize()">
+	<body onload="initialize();" onkeydown="keyDown(event);">
 		<canvas style="background-color:#444444;" id="myCanvas" height="400px" width="200px"></canvas>
-		<div id="score" style="width:200px;background-color:#CCCCCC;">Score: 0</div>
+		<div id="score" style="width:200px;background-color:#CCCCCC;">Score: daniel sux</div>
 	</body>
 </html>
