@@ -7,6 +7,12 @@
     			c = document.getElementById("myCanvas");
 				ctx = c.getContext("2d");
 
+				for(x = 0; x < 10; x++){
+					for(y = 0; y < 20; y++){
+						drawBlock(x, y, (x*100+y*100)%360);
+					}
+				}
+
 				block = generateBlock()
 				drawOctinomal(0, 0, block, 0);
 				drawOctinomal(0, 8, block, 360 / 2);
@@ -29,9 +35,19 @@
 
 				//loop find first block then add adjacent blocks
 				blocksAdded = 0;
+				generated = false;
 				while(true){
+					if(generated){
+						break;
+					}
 					for(x = 0; x < 8; x++) {
+						if(generated){
+							break;
+						}
 						for(y = 0; y < 8; y++) {
+							if(generated){
+								break;
+							}
 							if (block[x][y] == true) {
 								//direction of new block in relation to current block chose by random number
 								direction = Math.floor((Math.random()*4)+0);
@@ -72,12 +88,41 @@
 								  console.log("well dang: " + direction);
 								}
 								if (blocksAdded > 6){
-									return block;
+									generated = true;
 								}
 							}
 						}
 					}
 				}
+
+				//remove black space around shape
+				//dimension around octinomal
+				maxWidth = 0;
+				minWidth = 8;
+				maxHeight = 0;
+				minHeight = 8;
+				for(x = 0; x < 8; x++) {
+					for(y = 0; y < 8; y++) {
+						if(block[x][y] == true){
+							if(y > maxWidth){
+								maxWidth = y + 1;
+							}
+							if(y < minWidth){
+								minWidth = y + 1;
+							}
+							if(x > maxHeight){
+								maxHeight = x + 1;
+							}
+							if (x < minHeight){
+								minHeight = x + 1;
+							}
+						}
+					}
+				}
+				console.log("maxWidth: " + maxWidth + ", minWidth: " + minWidth + ", maxHeight: " + maxHeight + ", minHeight: " + minHeight);
+
+
+				return block;
 			}
 
 			function drawOctinomal(xoffset, yoffset, blocks, color){ 
