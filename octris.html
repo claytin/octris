@@ -1,6 +1,115 @@
 <!DOCTYPE html>
 <html>
-	<body>
-		<h1>yay, octris!!!</h1><h3>Daniels wrong</h3><h6>I think...</h6>
+	<head>
+		<title>Why octris doesn't work</title>
+		<script>
+			function initialize() {
+    			c = document.getElementById("myCanvas");
+				ctx = c.getContext("2d");
+
+				block = generateBlock()
+				drawOctinomal(0, 0, block, 0);
+				drawOctinomal(0, 8, block, 360 / 2);
+			}
+
+			
+			function generateBlock() {
+				var block = new Array();
+
+				//create an array with width and height 8 (the maximum dimensions a block can be)
+				for(x = 0; x < 8; x++) {
+					block[x] = new Array();
+					for(y = 0; y < 8; y++) {
+						block[x][y] = false;
+					}
+				}
+
+				//initial bock at center
+				block[4][4] = true;
+
+				//loop find first block then add adjacent blocks
+				blocksAdded = 0;
+				while(true){
+					for(x = 0; x < 8; x++) {
+						for(y = 0; y < 8; y++) {
+							if (block[x][y] == true) {
+								//direction of new block in relation to current block chose by random number
+								direction = Math.floor((Math.random()*4)+0);
+
+								switch(direction) {
+								case 0:
+									//in case the block is at the edge or already filled
+									if(y - 1 < 0 || block[x][y - 1] == true){
+										break;
+									}
+									
+									block[x][y - 1] = true;
+									blocksAdded++;
+									break;
+								case 1:
+									if(x + 1 >= 8 || block[x + 1][y] == true){
+										break;
+									}
+									block[x + 1][y] = true;
+									blocksAdded++;
+									break;
+								case 2:
+									if(y + 1 >= 8 || block[x][y + 1] == true){
+										break;
+									}
+									block[x][y + 1] = true;
+									blocksAdded++;
+									break;
+								case 3:
+									if(x - 1 < 0 || block[x - 1][y] == true){
+										break;
+									}
+									block[x - 1][y] = true;
+									blocksAdded++;
+									break;
+								default:
+								  //well dang...
+								  console.log("well dang: " + direction);
+								}
+								if (blocksAdded > 6){
+									return block;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			function drawOctinomal(xoffset, yoffset, blocks, color){ 
+				blocknumber = 0;
+				for(blockx = 0; blockx < 8; blockx++) {
+					for(blocky = 0; blocky < 8; blocky++) {
+						if (blocks[blockx][blocky] == true) {
+							drawBlock(blockx + xoffset, blocky + yoffset, color);
+							ctx.fillStyle = "#000000";
+							ctx.font="20px Arial";
+							ctx.fillText(blocknumber + "", (blockx * 20) + 5 + (xoffset * 20), (blocky * 20) + 18 + (yoffset * 20));
+							blocknumber++
+						}
+					}
+				}
+			}
+
+			function drawBlock(x, y, color) {
+    			//Convert to pixel coordinates
+    			pixelX = x*20;
+    			pixelY = y*20;
+    			
+    			//Set the fill color for drawing commands
+    			ctx.fillStyle = "hsl(" + color + ",100%,30%)";
+    			 
+    			//Create a filled rectangle
+    			ctx.fillRect(pixelX,pixelY,20,20);
+			}
+		</script>
+	</head>
+	<body onload="initialize()">
+		<canvas style="background-color:#444444;" id="myCanvas" height="400px" width="200px"></canvas>
+		<div id="score" style="width:200px;background-color:#CCCCCC;">Score: 0</div>
 	</body>
 </html>
