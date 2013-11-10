@@ -42,14 +42,20 @@
 					}
 				}
 
-				drawGrid(0, 0, bgGrid,50,70);
+				//fg stuff
+				fgGrid = new Array(tileCountHorizontal);
+				for(x = 0; x < tileCountHorizontal; x++){
+						fgGrid[x] = new Array(tileCountVertical);
+						for(y = 0; y < tileCountVertical; y++){
+						fgGrid[x][y] = 0;
+					}
+				}
 
 				//create initial octinomal
 				currentOctinomal = generateBlock();
 				octinomalX = Math.floor(currentOctinomal.length / 2);
 				octinomalY = -currentOctinomal[0].length + 1;
 				octinomalColor = Math.floor((Math.random()*360)+0)
-				drawOctinomal(octinomalX, octinomalY, currentOctinomal, octinomalColor);
 
 				//start game udpate timer
 				clearInterval(timer);
@@ -63,16 +69,43 @@
 
 				//check if collided / reached base
 				if(currentOctinomal[0].length + octinomalY - 1 >= tileCountVertical){
-					octinomalY--;
+					placeOctinomal();
+				}else{
+					for(x = 0; x < currentOctinomal.length; x++){
+						for(y = 0; y < currentOctinomal[0].length; y++){
+							if(currentOctinomal[x][y] == true){
+								if(fgGrid[x + octinomalX][y + octinomalY] > 0){
+									placeOctinomal();
+								}
+							}
+						}
+					}
 				}
 
 				redraw();
 			}
 
+			function placeOctinomal(){
+				//add the current octinomal to the fg grid
+					for(x = 0; x < currentOctinomal.length; x++){
+						for(y = 0; y < currentOctinomal[0].length; y++){
+							if(currentOctinomal[x][y] == true){
+								fgGrid[x + octinomalX][y + octinomalY - 1] = octinomalColor;
+							}
+						}
+					}
+					//create a new octinomal
+					currentOctinomal = generateBlock();
+					octinomalX = Math.floor(currentOctinomal.length / 2);
+					octinomalY = -currentOctinomal[0].length + 1;
+					octinomalColor = Math.floor((Math.random()*360)+0)
+			}
+
 			function redraw(){
 				//redraw everything
 				ctx.clearRect(0,0,ctx.width,ctx.height);	//clear screen
-				drawGrid(0, 0, bgGrid,50,70);	//draw background
+				drawGrid(0, 0, bgGrid, 5,50);	//draw background
+				drawGrid(0, 0, fgGrid)	//draw fg
 				drawOctinomal(octinomalX, octinomalY, currentOctinomal, octinomalColor);	//draw current octinomal
 			}
 			
@@ -84,6 +117,17 @@
     			}
     			if(e.keyCode == 39) { //Right arrow
     				if (octinomalX + currentOctinomal.length < tileCountHorizontal) {
+    					//check side for collision first
+    					for(x = 0; x < currentOctinomal.length; x++){
+    						for(y = 0; y < currentOctinomal[0].length; y++){
+    							if(currentOctinomal[x][y] == true){
+    								if(fgGrid[x + octinomalX][y + octinomalY] > 0){
+    									break;
+    								}
+    							}
+    						}
+    					}
+
     					octinomalX++;
     				}
     			}
