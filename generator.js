@@ -98,7 +98,7 @@ function generateBlock() {
 			}
 		}
 	}
-	
+
 	var newblock = new Array();
 
 	//create an array with width and height 8 (the maximum dimensions a block can be)

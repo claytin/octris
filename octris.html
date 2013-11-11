@@ -3,6 +3,7 @@
 	<head>
 		<title>Why octris doesn't work</title>
 		<script src="generator.js"></script>
+		<script src="scores.js"></script>
 		<script>
 			//global variables
 			var timer;  //Game timer
@@ -30,8 +31,8 @@
 				ctx = canvas.getContext("2d");
 				//canvas.width = document.body.clientWidth
 				//canvas.height = document.body.clientHeight;
-				canvas.height = window.innerHeight - 30;
-				canvas.width = window.innerWidth / 4;
+				canvas.height = window.innerHeight - 50;
+				canvas.width = canvas.height / 2;
 
 				tileCountVertical = 20;
 				tileCountHorizontal = 10;
@@ -68,9 +69,27 @@
     			timer = setInterval(function(){update()}, 500);
 
     			update();
+
+
+    			updatescore();
+			}
+
+			function updatescore(){
+				var newScore = scores[Math.floor((Math.random()*(scores.length))+0)];
+				var newScore2 = scores[Math.floor((Math.random()*(scores.length))+0)];
+				document.getElementById("score").innerHTML = "Score: " + newScore + " " + newScore2;
+			}
+
+			function updatesize(){
+				canvas.height = window.innerHeight - 50;
+				canvas.width = canvas.height / 2;
+				tileWidth = canvas.width / tileCountHorizontal;
+				tileHeight = canvas.height / tileCountVertical;
 			}
 
 			function update(){
+				updatesize();
+
 				octinomalY++;
 
 				//check if collided / reached base
@@ -95,10 +114,25 @@
 				//return false;
 			}
 
+			function loose(){
+				clearInterval(timer);
+				canvas.width = 0;
+				canvas.height = 0;
+				document.getElementById("score").innerHTML = "<h1><center>Wow... Looser</center></h1>";
+			}
+
 			function placeOctinomal(){
 				//no longer do the drop blocks thing
 				dropOctinomal = false;
 				clearInterval(droptimer);
+
+				updatescore();
+
+				//check for loss
+				if(octinomalY <= 0){
+					loose();
+					return;
+				}
 
 				//add the current octinomal to the fg grid
 				for(x = 0; x < currentOctinomal.length; x++){
@@ -108,9 +142,27 @@
 						}
 					}
 				}
+
+				//check for lines
+				isLine = true;
+				for(y = 0; y < fgGrid[0].length; y++){
+					isLine = true;
+					for(x = 0; x < fgGrid.length; x++){
+						if(fgGrid[x][y] <= 0 || fgGrid[x][y] == false){
+							isLine = false;
+						}
+					}
+
+					if(isLine == true){
+						for(x = 0; x < fgGrid.length; x++){
+							fgGrid[x][y] = 0;
+						}
+					}
+				}
+
 				//create a new octinomal
 				currentOctinomal = generateBlock();
-				octinomalX = Math.floor(currentOctinomal.length / 2);
+				octinomalX = (Math.floor(tileCountHorizontal / 2)) - (Math.floor(currentOctinomal.length / 2));
 				octinomalY = -currentOctinomal[0].length + 1;
 				octinomalColor = Math.floor((Math.random()*360)+0);
 
@@ -273,7 +325,7 @@
 		</script>
 	</head>
 	<body onload="initialize();" onkeydown="keyDown(event);">
-		<canvas style="background-color:#444444;" id="myCanvas"></canvas>
-		
+		<canvas style="background-color:#444444;" id="myCanvas" height="400px" width="200px"></canvas>
+		<div id="score" style="width:100%;background-color:#CCCCCC;">Score: daniel sux</div>
 	</body>
 </html>
