@@ -1,0 +1,63 @@
+@font-face {
+	font-family: hellovetica;
+	src: url('font1.ttf');
+}
+
+.contentbox{
+	box-shadow: 0px 0px 25px #666666;
+	background-color: #eaeaea;
+}
+
+#gameCanvas{
+	float: left;
+
+	 border-style: none;
+}
+
+#content{
+	margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+    padding-top:3%;
+    font-family: hellovetica;
+    font-weight:bold;
+    font-size: 15px;
+
+    border-style: none;
+}
+
+#info{
+	float: right;
+	background-color: #eaeaea;
+	margin-left: 20px;
+	padding: 10px;
+	width: 20em;
+	height: 21em;
+
+	border-style: none;
+}
+
+#score{
+	text-align: left;
+	padding: 5px;
+	background-color: #ffffff;
+	word-wrap: break-word;
+	height: 5em;
+}
+
+#scoretitle{
+	text-align: left;
+	padding: 5px;
+	background-color: #ffffff;
+	font-size: 20px;
+}
+
+#options{
+	background-color: #ffffff;
+	text-align: left;
+	padding: 5px;
+}
+
+body{
+	background-image:url('bg.png');
+}

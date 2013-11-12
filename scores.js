@@ -1,4 +1,6 @@
-var scores = ["Chase is watching",
+var scores = [
+"testtesttestesttestestestesaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+"Chase is watching",
 "Chase loves you",
 "Chase loves...",
 "Chase is you",

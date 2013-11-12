@@ -4,7 +4,12 @@
 		<title>Why octris doesn't work</title>
 		<script src="generator.js"></script>
 		<script src="scores.js"></script>
+		<link rel="stylesheet" type="text/css" href="style.css"/>
 		<script>
+			//options
+			var blockshadow;
+			var autoscale;
+
 			//global variables
 			var timer;  //Game timer
 			var droptimer;
@@ -23,30 +28,20 @@
 			var dropOctinomal;
 
 			//grids
-			var bgGrid;	//a fancy smancy background
 			var fgGrid;	//where everything goes to die
 
 			function initialize() {
-    			canvas = document.getElementById("myCanvas");
+    			canvas = document.getElementById("gameCanvas");
 				ctx = canvas.getContext("2d");
 				//canvas.width = document.body.clientWidth
 				//canvas.height = document.body.clientHeight;
-				canvas.height = window.innerHeight - 50;
-				canvas.width = canvas.height / 2;
+				canvas.height = 600;
+				canvas.width = 300;
 
 				tileCountVertical = 20;
 				tileCountHorizontal = 10;
 				tileWidth = canvas.width / tileCountHorizontal;
 				tileHeight = canvas.height / tileCountVertical;
-
-				//background stuff
-				bgGrid = new Array(tileCountHorizontal);
-				for(x = 0; x < tileCountHorizontal; x++){
-					bgGrid[x] = new Array(tileCountVertical);
-					for(y = 0; y < tileCountVertical; y++){
-						bgGrid[x][y] = Math.floor((Math.random()*360)+1);
-					}
-				}
 
 				//fg stuff
 				fgGrid = new Array(tileCountHorizontal);
@@ -70,25 +65,54 @@
 
     			update();
 
-
     			updatescore();
+
+    			window.onresize = function(event) {updatesize();}
+			}
+
+			function toggleshadows(){
+				if(blockshadow == true){
+					blockshadow = false;
+				}else{
+					blockshadow = true;
+				}
+			}
+
+			function togglescale () {
+				if(autoscale == true){
+					autoscale = false;
+				}else{
+					autoscale = true;
+				}
+				updatesize();
+			}
+
+			function restart(){
+				for(x = 0; x < fgGrid.length; x++){
+					for(y = 0; y < fgGrid[0].length; y++){
+						fgGrid[x][y] = 0;
+					}
+				}
+
+				initialize();
 			}
 
 			function updatescore(){
 				var newScore = scores[Math.floor((Math.random()*(scores.length))+0)];
-				document.getElementById("score").innerHTML = "Score: " + newScore;
+				document.getElementById("score").innerHTML = newScore;
 			}
 
 			function updatesize(){
-				canvas.height = window.innerHeight - 50;
-				canvas.width = canvas.height / 2;
+				if(autoscale){
+					canvas.height = window.innerHeight - 150;
+					canvas.width = canvas.height / 2;	
+				}
+				
 				tileWidth = canvas.width / tileCountHorizontal;
 				tileHeight = canvas.height / tileCountVertical;
 			}
 
 			function update(){
-				updatesize();
-
 				octinomalY++;
 
 				//check if collided / reached base
@@ -115,8 +139,6 @@
 
 			function loose(){
 				clearInterval(timer);
-				canvas.width = 0;
-				canvas.height = 0;
 				document.getElementById("score").innerHTML = "<h1><center>Wow... Looser</center></h1>";
 			}
 
@@ -169,10 +191,21 @@
 
 			function redraw(){
 				//redraw everything
-				ctx.clearRect(0,0,ctx.width,ctx.height);	//clear screen
-				drawGrid(0, 0, bgGrid, 10,50);	//draw background
+				ctx.fillStyle = "#ff00ff"
+				ctx.clearRect(0, 0, canvas.width, canvas.height);	//clear screen
 				drawGrid(0, 0, fgGrid, 100, 50)	//draw fg
+
+				if(blockshadow == true){
+					ctx.shadowBlur = 50;
+					ctx.shadowColor = "#888888";
+					drawGrid(0, 0, fgGrid, 100, 50)	//draw fg
+					drawOctinomal(octinomalX, octinomalY, currentOctinomal, octinomalColor);	//draw current octinomal
+				}
+
+				//draw without shadow
+				ctx.shadowBlur = 0;
 				drawOctinomal(octinomalX, octinomalY, currentOctinomal, octinomalColor);	//draw current octinomal
+				drawGrid(0, 0, fgGrid, 100, 50)	//draw fg
 			}
 			
 			function keyDown(e) {
@@ -290,6 +323,7 @@
 					for(blocky = 0; blocky < blocks[0].length; blocky++) {
 						if (blocks[blockx][blocky] >= 1) {
 							drawBlock(blockx + xoffset, blocky + yoffset, color, 100, 50);
+							drawBlock(blockx + xoffset, blocky + yoffset, color, 100, 50);
 							ctx.fillStyle = "#000000";
 							ctx.font="20px Arial";
 							//ctx.fillText(blocknumber + "", (blockx * tileWidth) + 5 + (xoffset * tileWidth),
@@ -319,12 +353,31 @@
     			ctx.fillStyle = "hsl(" + color + "," + saturation + "%," + brightness + "%)";
     			 
     			//Create a filled rectangle
-    			ctx.fillRect(pixelX,pixelY, tileWidth, tileHeight);
+    			ctx.fillRect(pixelX - 1, pixelY - 1, tileWidth + 1, tileHeight + 1);
 			}
 		</script>
 	</head>
 	<body onload="initialize();" onkeydown="keyDown(event);">
-		<canvas style="background-color:#444444;" id="myCanvas" height="400px" width="200px"></canvas>
-		<div id="score" style="width:100%;background-color:#CCCCCC;">Score: daniel sux</div>
+		<center>
+			<div id="content">
+				<canvas id="gameCanvas" class="contentbox"></canvas>
+				<div id="info" class="contentbox">
+					<div id="scoretitle">Score:</div>
+					<div id="score">Score: daniel sux</div>
+					<br/>
+					<div id="options">
+						Options:
+						<br/>
+						<input type="checkbox" name="button1" id="nextbt" value="View " onclick="toggleshadows()">shadows<br/>
+						<input type="checkbox" name="button1" id="nextbt" value="View " onclick="togglescale(this,'View ','Hide ')">scale<br/>
+						<input type="checkbox" name="button1" id="nextbt" value="View " onclick="buttonToggle(this,'View ','Hide ')">shadows!!<br/>
+						<input type="checkbox" name="button1" id="nextbt" value="View " onclick="buttonToggle(this,'View ','Hide ')">shadows!!!
+					</div>
+					<center>
+						<input type="button" name="button1" id="nextbt" value="restart" onclick="restart()">
+					</center>
+				</div>
+			</div>
+		</center>
 	</body>
 </html>
