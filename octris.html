@@ -8,14 +8,15 @@
 		<script>
 			//options
 			var blockshadow;
-			var autoscale;
+			var autoscale = true;
+			var widemode = true;
 
 			//global variables
 			var timer;  //Game timer
 			var droptimer;
 
-			var tileCountVertical;
-			var tileCountHorizontal;
+			var tileCountVertical = 40;
+			var tileCountHorizontal = 20;
 			var tileWidth;
 			var tileHeight;
 
@@ -30,16 +31,15 @@
 			//grids
 			var fgGrid;	//where everything goes to die
 
+			//other stuff
+			var looser = false;
+
 			function initialize() {
     			canvas = document.getElementById("gameCanvas");
 				ctx = canvas.getContext("2d");
 				//canvas.width = document.body.clientWidth
 				//canvas.height = document.body.clientHeight;
-				canvas.height = 600;
-				canvas.width = 300;
 
-				tileCountVertical = 20;
-				tileCountHorizontal = 10;
 				tileWidth = canvas.width / tileCountHorizontal;
 				tileHeight = canvas.height / tileCountVertical;
 
@@ -66,6 +66,7 @@
     			update();
 
     			updatescore();
+    			updatesize();
 
     			window.onresize = function(event) {updatesize();}
 			}
@@ -76,15 +77,33 @@
 				}else{
 					blockshadow = true;
 				}
+
+				redraw();
 			}
 
 			function togglescale () {
 				if(autoscale == true){
 					autoscale = false;
+					canvas.height = 600;
+					canvas.width = 300;
 				}else{
 					autoscale = true;
 				}
 				updatesize();
+			}
+
+			function togglewide(){
+				if(widemode == true){
+					widemode = false;
+					tileCountHorizontal = 10;
+					tileCountVertical = 20;
+				}else{
+					widemode = true;
+					tileCountHorizontal = 20;
+					tileCountVertical = 40;
+				}
+
+				restart();
 			}
 
 			function restart(){
@@ -94,6 +113,11 @@
 					}
 				}
 
+				document.getElementById("loose").innerHTML = "";
+				document.getElementById("score").innerHTML = "Ummmmmm... Okay...";
+
+				looser = false;
+
 				initialize();
 			}
 
@@ -102,14 +126,21 @@
 				document.getElementById("score").innerHTML = newScore;
 			}
 
+			minHeight = 500;
+
 			function updatesize(){
-				if(autoscale){
-					canvas.height = window.innerHeight - 150;
+				if(window.innerHeight - 125 < minHeight){
+					canvas.height = minHeight;
+					canvas.width = canvas.height / 2;
+				}else if(autoscale){
+					canvas.height = window.innerHeight - 125;
 					canvas.width = canvas.height / 2;	
 				}
 				
 				tileWidth = canvas.width / tileCountHorizontal;
 				tileHeight = canvas.height / tileCountVertical;
+
+				redraw();
 			}
 
 			function update(){
@@ -138,8 +169,11 @@
 			}
 
 			function loose(){
+				looser = true;
 				clearInterval(timer);
-				document.getElementById("score").innerHTML = "<h1><center>Wow... Looser</center></h1>";
+				document.getElementById("loose").innerHTML = "<div style=\"padding: 10px;\"><h1 style=\"font-size: 30px;\">Wow,<br/> Looser</h1> New Hight Score: " + document.getElementById("score").innerHTML + "<br/><input style=\"padding: 10px;\" type=\"button\" name=\"button1\" id=\"nextbt\" value=\"restart\" onclick=\"restart()\"><div>";
+				document.getElementById("score").innerHTML = "HEH HEH, LOOSER...";
+				
 			}
 
 			function placeOctinomal(){
@@ -175,8 +209,12 @@
 					}
 
 					if(isLine == true){
-						for(x = 0; x < fgGrid.length; x++){
-							fgGrid[x][y] = 0;
+						for(a = 0; a < fgGrid.length; a++){
+							for(b = fgGrid[0].length - 1; b > 0; b--){
+								if(b - 1 >= 0 && b <= y){
+									fgGrid[a][b] = fgGrid[a][b - 1];
+								}
+							}
 						}
 					}
 				}
@@ -184,7 +222,7 @@
 				//create a new octinomal
 				currentOctinomal = generateBlock();
 				octinomalX = (Math.floor(tileCountHorizontal / 2)) - (Math.floor(currentOctinomal.length / 2));
-				octinomalY = -currentOctinomal[0].length + 1;
+				octinomalY = -currentOctinomal[0].length;
 				octinomalColor = Math.floor((Math.random()*360)+0);
 
 			}
@@ -212,7 +250,7 @@
 				console.log(e.keyCode);
 
 				//prevent movement when droping block
-				if(dropOctinomal == false){
+				if(dropOctinomal == false && looser == false){
 	    			if(e.keyCode == 37) { //Left arrow
 	    				if(octinomalX > 0){
 	    					collideWithSize = false;
@@ -293,6 +331,10 @@
 	    			}
 				}
 
+				if(e.keyCode == 82){
+					restart();
+				}
+
     			if(e.keyCode == 32){
     				update();
     			}
@@ -318,23 +360,16 @@
 			}
 
 			function drawOctinomal(xoffset, yoffset, blocks, color){ 
-				blocknumber = 0;
 				for(blockx = 0; blockx < blocks.length; blockx++) {
 					for(blocky = 0; blocky < blocks[0].length; blocky++) {
 						if (blocks[blockx][blocky] >= 1) {
 							drawBlock(blockx + xoffset, blocky + yoffset, color, 100, 50);
-							drawBlock(blockx + xoffset, blocky + yoffset, color, 100, 50);
-							ctx.fillStyle = "#000000";
-							ctx.font="20px Arial";
-							//ctx.fillText(blocknumber + "", (blockx * tileWidth) + 5 + (xoffset * tileWidth),
-							 //(blocky * tileHeight) + 18 + (yoffset * tileHeight));
-							blocknumber++
 						}
 					}
 				}
 			}
 
-			function drawGrid(xoffset, yoffset, blocks, saturation, brightness){ 
+			function drawGrid(xoffset, yoffset, blocks, saturation, brightness){
 				for(blockx = 0; blockx < blocks.length; blockx++) {
 					for(blocky = 0; blocky < blocks[0].length; blocky++) {
 						if (blocks[blockx][blocky] >= 1) {
@@ -360,22 +395,38 @@
 	<body onload="initialize();" onkeydown="keyDown(event);">
 		<center>
 			<div id="content">
+				<div align="left" id="title"><h1>Octris</h1><h4 style="padding-left:3em"> is a bad idea<sub style="font-size: 5px;">by daniel</sub></h4></div>
 				<canvas id="gameCanvas" class="contentbox"></canvas>
-				<div id="info" class="contentbox">
-					<div id="scoretitle">Score:</div>
-					<div id="score">Score: daniel sux</div>
-					<br/>
-					<div id="options">
-						Options:
+				<div id="sidepanel">
+					<div id="sidecontent" class="contentbox">
+						<div id="scoretitle">Score:</div>
+						<div id="score">Score: daniel sux</div>
 						<br/>
-						<input type="checkbox" name="button1" id="nextbt" value="View " onclick="toggleshadows()">shadows<br/>
-						<input type="checkbox" name="button1" id="nextbt" value="View " onclick="togglescale(this,'View ','Hide ')">scale<br/>
-						<input type="checkbox" name="button1" id="nextbt" value="View " onclick="buttonToggle(this,'View ','Hide ')">shadows!!<br/>
-						<input type="checkbox" name="button1" id="nextbt" value="View " onclick="buttonToggle(this,'View ','Hide ')">shadows!!!
+						<div id="options">
+							Options:
+							<br/>
+							<input type="checkbox" name="button1" id="nextbt" value="View " onclick="toggleshadows()">shadows<br/>
+							<input type="checkbox" name="button1" id="nextbt" value="View " checked="checked" onclick="togglescale()">scale<br/>
+							<input type="checkbox" name="button1" id="nextbt" value="View " checked="checked" onclick="togglewide()">wide mode for Daniel<br/>
+							<input type="checkbox" name="button1" id="nextbt" value="View " onclick="buttonToggle(this,'View ','Hide ')">shadows!!!
+						</div>
+						<center>
+							<input type="button" name="button1" id="nextbt" value="restart" onclick="restart()">
+						</center>
 					</div>
-					<center>
-						<input type="button" name="button1" id="nextbt" value="restart" onclick="restart()">
-					</center>
+					<div class="contentbox" id="sidecontent">
+						Daniel, you should make the font.
+					</div>
+					<div class="contentbox" id="sidecontent">
+						and the textures
+					</div>
+					<div class="contentbox" id="sidecontent">
+						and everything else...
+					</div>
+				</div>
+
+				<div id="loose" class="contentbox">
+					<!--stuff goes here when you loose-->
 				</div>
 			</div>
 		</center>
