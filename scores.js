@@ -64,4 +64,5 @@ var scores = [
 "pentium!!!",
 "It's all about the pentiums",
 "krew cruz kran",
-"Daniel, you should do the font"];
+"Daniel, you should do the font",
+"daniel is... a... swell guy"];
