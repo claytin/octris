@@ -319,7 +319,7 @@
 	    				}
 
 	    			}
-	    			if(e.keyCode == 40){ //down arrow (place block)
+	    			if(e.keyCode == 32){ //down arrow (place block)
 	    				dropOctinomal = true;
 
 	    				//start drop block timer
@@ -328,6 +328,9 @@
 	    					update();
 	    					update();
 	    				}, 1);
+	    			}
+	    			if(e.keyCode == 40){
+	    				octinomalY += 1;
 	    			}
 				}
 
